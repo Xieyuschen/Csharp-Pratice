@@ -45,15 +45,22 @@ namespace Delegate_and_Event
                 Console.WriteLine("Goodbye!");
             }
         }
+        class try1{
+            public void Show()
+            {
+                Console.WriteLine("delegate different class is right");
+            }
+        }
         static void Main(string[] arg)
         {
             Relative relative = new Relative();
+            try1 try1 = new try1();
             //添加一个对象的方法（必须实例化）并且不需要在添加的时候带函数参数列表
             SayToYou sayToYou = new SayToYou(relative.Hello);
             sayToYou += relative.GutenTag;
             sayToYou += relative.Goodbye;
             sayToYou += relative.Aufwiedersehen;
-
+            sayToYou += try1.Show;
             //调用委托的时候可以直接加括号就可以了
             sayToYou();
 
