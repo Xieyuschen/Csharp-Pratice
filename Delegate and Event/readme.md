@@ -89,3 +89,27 @@ public class Operation
 &emsp;
 泛型在委托和事件中的应用并没有什么特别需要注意的，只是核心的内容需要在设计的时候完成。如果提前订阅好而不在main函数中使用，可以考虑在构造函数中完成。
 在之前有所体现。
+
+# Action与Func的泛型委托。
+- Action如何使用？
+Action是提前定义好的泛型，最多只接受16个参数。只接受返回类型为void类型函数的委托。
+- Func 如何使用？
+Func是定义好的泛型委托，只能接受有返回类型函数的委托。
+-Func 和 Action的区别是什么？
+Func必须接受有返回值的函数，并把接受委托的函数返回值类型写在Func泛型列表的最后面。即尖括号列表内类型顺序为：参数列表的类型顺序，最后是返回类型。而返回类型为void的函数若想要委托就必须使用Action。举出一些示例如下，省略函数的实现代码。
+```C# 
+int Calculate(double x,double y){};
+Func<double,double,int> func=new Func<double,double,int>();
+double div(int x,int y){};
+Func<int,int,double> func2=new Func<int,int,double>();
+string Show(int a,double b); 
+Func<int,double,string> func3=new Func<int,double,string>();
+//Func不能接受无返回值的函数
+void Print(int){};
+//错误，因为Func尖括号列表中最后一个类型不能是void。
+//Func<int,void> func4=new Func<int,void>();
+//在这里要使用Action进行委托
+Action<int> action=new Action<int>();
+
+```
+
