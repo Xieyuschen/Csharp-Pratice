@@ -21,7 +21,7 @@
 - delegate的一些基本注意事项
 1. delegate的声明要放在和要委托类平行的位置。如我想delegate student类的AddScore()方法。那么需要把delegate声明在class student 的上边。即必须和student类是平行关系而不能包含在类中去。
 2. delegate其实会隐式生成一个类，所以在实例化累的时候可以在构造函数里面直接绑定某些类的成员函数，可以绑定若干个类的成员函数。部分示例代码如下：
-```
+```C#
         class Relative 
         class try1{
             public void Show()
