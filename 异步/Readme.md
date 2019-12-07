@@ -170,3 +170,18 @@ static async Task Main(string[] args)
 
 - 同时启动任务  
 `System.Threading.Tasks.Task` 和相关类型是可以用于推断正在进行中的任务的类。要同时开始任务就要把所有任务都加到Task里面去，然后具体执行的时候根据各自完成特点进行执行。也就是说这些任务都是这个时候开始的（加入任务队列我觉得更加的贴切）。然后之后使用await让它们执行，这样的话可以一次启动所有的异步任务。 仅在需要结果时才会等待每项任务。 
+- 与任务组合
+下面这段代码很好的说明了一个异步方法应该如何定义和使用。
+```C#
+async Task<Toast> MakeToastWithButterAndJamAsync(int number)
+{
+    var toast = await ToastBreadAsync(number);
+    ApplyButter(toast);
+    ApplyJam(toast);
+    return toast;
+}
+```
+首先签名里具有`async`这个签名。这个签名会向编译器发出信号，说明该方法**包含`await`语句**，也包含异步操作。此方法返回一个`Task<TResult>`.  
+所以可以通过将操作分离到一个**返回任务的新方法**来组合任务。可以选择等待此任务的时间，也可以同时启动其他的任务。
+- 高效的等待任务  
+可以使用`Task`类的方法改进上述代码末尾的一系列`await`语句。常见API有：`WenAll`,`WhenAny`.返回一个任务，一个是全部完成才返回，另一个是有一个完成就返回。
