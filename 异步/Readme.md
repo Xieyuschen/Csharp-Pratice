@@ -46,7 +46,7 @@ lambda表达式在这一块是相当重要的，之后学了再说吧。
 - 任务,线程与区域性   
 每一个现场都具有一个关联的区域和UI属性,分别由Threading.CurrentCulture 和 Threading.CurrentUICulture 属性定义.  
 线程的区域用于注入格式,分析,排序和字符串比较操作中. 线程的UI属性用于查找资源.CultureInfo.DefaultThreadCurrentCulture 和CultureInfo.DefaultThreadingCurrentUICulture 属性可以为所有线程指定默认区域性.如果不使用这两个属性修改,系统区域性为我们定义线程的默认区域性和UI属性.
-- 创建任务延续  
+## 创建任务延续  
 使用`Task.ContinueWith` 和 `Task<TResult>.ContinueWith` 方法,可以指定**要在先行任务完成时启动**的任务.延续任务的委托已经传递了对先行任务的引用,因此可以检查先行任务的状态.并可以通过检索 `Task<TResult>.Result`属性的值将先行任务的输出用作延续任务的输入.  
 简单而言,就是可以使用一个方法将任务A绑定到任务B上面去,任务A只有在B执行完之后才会被执行,这个步骤的完成就靠上面说的那几个方法和属性.
 ```C#
@@ -59,6 +59,7 @@ var getData = Task.Factory.StartNew(() => {
 
             return values;
         });
+        //这里的参数x就是getData运行之后返回的values数组.
         var processData = getData.ContinueWith((x) => {
             int n = x.Result.Length;
             long sum = 0;
@@ -79,9 +80,51 @@ var getData = Task.Factory.StartNew(() => {
         Console.WriteLine(displayData.Result);
 ```
 嗯这里给出了创建任务延续的例子,关注如何通过方法`ContinueWith()`来完成任务的延续.  
-首先`GetData`通过调用`TaskFactory.StartNew<TRusult>(Func<TReslut>)`方法来启动.`getData`返回一个数组.  
-关注最后一行的`displayData.Result`,这里说明`Result`指明要把`displayData`的先行任务的输出作为这里displayData的输入.那么我就需要去寻找`ContinueWith()`这个方法,这个方法知道你过的就是当前需要寻找的.  
-那么阅读代码,我发现一句  
-` var displayData = processData.ContinueWith()`  
-那么这个式子是什么意思呢? ---- 即把`displayData`的先行任务指定为`processData`.  
-那么这里可以理解了,但是
+- 首先`GetData`通过调用`TaskFactory.StartNew<TRusult>(Func<TReslut>)`方法来启动.`getData`返回一个数组.  
+
+- 然后我们来关注`ContinueWith(/*some important in parentnese*/)`  
+现在我知道了`ContinueWith`是用来指定先行任务的,然后把先行任务的输出当作输入.那么我们来看`var processData = getData.ContinueWith((x) =>...)`这里面的内容,x作为一个传入参数,而在括号的代码框里,又出现了`x.GetUpperBound`这样的语句,说明x是一个数组,那么这个数组是怎么传进来的呢?很明显没有显式的指定传进来的参数,那么这个参数肯定是`ContinueWith`完成的.  
+事情应该是在这样的,ContinueWith指定了先行任务,那么先行任务再执行完后会自动的把自己返回的结果传递给之后的任务进行执行.
+
+- 关注最后一行的`displayData.Result`,这个语句为什么能让控制台输出一些内容呢?  
+首先`Result`的代码提示为:
+`Gets the result value of this Task<TResult>`  
+也就是说这里调用了displayData,然后发现这个有一个先行任务,那么我需要执行先行任务,然后这样追踪到processData,因为getData已经返回来值,所以说就逐渐再倒回来进行运算.  
+  
+- `ContinueWith`的额外用法:  
+因为 Task.ContinueWith 是实例方法，所以我可以将方法调用链接在一起，而不是为每个先行任务去实例化 `Task<TResult>` 对象。 以下示例与上一示例在功能上等同，唯一的不同在于它将对 Task.ContinueWith 方法的调用链接在一起。 请注意，通过方法调用链返回的 Task<TResult> 对象是最终延续任务。
+```C#
+ var displayData = Task.Factory.StartNew(() => { 
+                                                 Random rnd = new Random(); 
+                                                 int[] values = new int[100];
+                                                 for (int ctr = 0; ctr <= values.GetUpperBound(0); ctr++)
+                                                    values[ctr] = rnd.Next();
+
+                                                 return values;
+                                              } ).  
+                        ContinueWith((x) => {
+                                        int n = x.Result.Length;
+                                        long sum = 0;
+                                        double mean;
+                                  
+                                        for (int ctr = 0; ctr <= x.Result.GetUpperBound(0); ctr++)
+                                           sum += x.Result[ctr];
+
+                                        mean = sum / (double) n;
+                                        return Tuple.Create(n, sum, mean);
+                                     } ). 
+                        ContinueWith((x) => {
+                                        return String.Format("N={0:N0}, Total = {1:N0}, Mean = {2:N2}",
+                                                             x.Result.Item1, x.Result.Item2, 
+                                                             x.Result.Item3);
+                                     } );                         
+      Console.WriteLine(displayData.Result);
+```
+
+
+嗯这两个方法的使用方法就是这样了,微软的文档真的是具体入微,超级棒!.^_^
+
+## 创建分离的子任务:
+- 如果在任务中运行的用户代码创建一个新任务，且未指定 AttachedToParent 选项，则该新任务不采用任何特殊方式与父任务同步。 这种不同步的任务类型称为“分离的嵌套任务” 或“分离的子任务”  
+注意这里创建的任务是在一个任务中建立的,即嵌套任务.在当前任务的用户代码中再创建一个任务,然后不指定 选项就会是子任务.  
+- 父任务不会等待分离子任务完成.  
