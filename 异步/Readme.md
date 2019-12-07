@@ -128,3 +128,45 @@ var getData = Task.Factory.StartNew(() => {
 - 如果在任务中运行的用户代码创建一个新任务，且未指定 AttachedToParent 选项，则该新任务不采用任何特殊方式与父任务同步。 这种不同步的任务类型称为“分离的嵌套任务” 或“分离的子任务”  
 注意这里创建的任务是在一个任务中建立的,即嵌套任务.在当前任务的用户代码中再创建一个任务,然后不指定 选项就会是子任务.  
 - 父任务不会等待分离子任务完成.  
+
+
+# 异步编程
+- I/O绑定与CPU绑定代码  
+I/O绑定，如从网络请求的数据或访问数据库。CPU绑定代码，如执行成本高昂的计算。   
+## 异步模型的基本概述
+- `Task`,`Task<T>`,`async`与`await`.  
+对于I/O绑定代码，当`await`一个操作，将返回async方法中的一个Task 或 `Task<T>`.对于CPU绑定代码，使用await代码时后台线程通过Task.Run启动。
+`async`关键字把方法转换为异步方法，这样可以在正文使用`await`关键字。  
+应用`await`关键字之后，它将挂起调用方法，并将控制权还给调用方（所以啥是调用方？！），直到等待的任务完成。并且仅允许在异步的方式中使用`await`，
+
+## 识别CPU绑定和I/O绑定工作  
+- 在绑定时要确定所执行的操作时I/O绑定或CPU绑定非常重要，因为这会极大影响代码性能。在写代码的时候可以根据这两个问题来确定使用哪种绑定：  
+(1) 如果代码会等待某些内容，例如数据库的数据，那么工作为I/O绑定。  
+(2) 如果代码会执行开销巨大的计算，则工作为CPU绑定。  
+如果工作为I/O绑定，使用async和await就可以（而不使用Task.Run)。如果为CPU绑定，且**重视**响应能力，不仅使用async和await，而且在另一个线程上使用Task.Run生成工作。
+
+- 阻塞与await  
+阻塞最典型的例子就如学习编程最常见的顺序型执行代码，每执行一条语句都会阻塞，什么都不会做直到这一条语句被执行完。但这种方式显然是不合适的，所以使用await。await的功能是在执行一部分代码的时候，不会阻塞而会响应别的任务，但是如果只有await那也不会启动任何的其他任务。那微软Docs里的例子放这里：
+```C#
+static async Task Main(string[] args)
+{
+    Coffee cup = PourCoffee();
+    Console.WriteLine("coffee is ready");
+    Egg eggs = await FryEggs(2);
+    Console.WriteLine("eggs are ready");
+    Bacon bacon = await FryBacon(3);
+    Console.WriteLine("bacon is ready");
+    Toast toast = await ToastBread(2);
+    ApplyButter(toast);
+    ApplyJam(toast);
+    Console.WriteLine("toast is ready");
+    Juice oj = PourOJ();
+    Console.WriteLine("oj is ready");
+
+    Console.WriteLine("Breakfast is ready!");
+}
+```
+在之前没有加await的时候，烤面包的操作就是把面放到烤箱里然后一直盯着，其他的任何事情都不会接受（被忽略）。而加上await之后虽然还是把面包放进去然后一直盯着，但是现在已经可以回应想引起注意的东西。
+
+- 同时启动任务  
+`System.Threading.Tasks.Task` 和相关类型是可以用于推断正在进行中的任务的类。要同时开始任务就要把所有任务都加到Task里面去，然后具体执行的时候根据各自完成特点进行执行。也就是说这些任务都是这个时候开始的（加入任务队列我觉得更加的贴切）。然后之后使用await让它们执行，这样的话可以一次启动所有的异步任务。 仅在需要结果时才会等待每项任务。 
