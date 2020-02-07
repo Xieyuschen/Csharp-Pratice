@@ -118,3 +118,26 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
 今天的主要任务就是写了两个Api，然后了解了Dto的传递和转换。学会了`AutoMapper`的使用方式。  
 今天的学习体验呢，就是还是脑子不清晰，光想写出来点东西出来，而没有停下来把整个流程设计一下。然后把自己不明白的问题提出来，挨个寻找答案。  
 嗯明天就继续这么做，慢慢的来，进步是可以看得见的。
+```cpp
+int main(){
+    int a,b;
+    //记录素数的个数
+    int i=0;
+    int flag;
+    scanf("%d",&a);
+    while(a>100&&a<10000)
+    {
+        b=2;
+        flag=1;
+        while(b<a)
+        {
+            if(a%b==0)
+            {
+                flag=0;
+                breack;
+            }
+        }
+        i+=flag;
+    }
+}
+```
