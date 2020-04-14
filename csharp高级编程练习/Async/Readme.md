@@ -1,22 +1,6 @@
-# Readme - Code Samples for Chapter 15, Asynchronous Programming
-
-This chapter contains these samples:
-
-* Foundations (changing synchronous methods to async, continuation)
-* ErrorHandling (error handling with async methods)
-* AsyncPatternsWPF (synchronous .vs. asynchronous, using the asynchronous pattern, event-based async pattern, and task-based async pattern)
-
-The Foundations and ErrorHandling samples show core features of using the async/await keywords with C#.
-
-The AsyncPatternsWPF demonstrates the advantages of the async/await keywords and shows different async patterns that are used with .NET. To run the application, you need to request a BING key and add it to the BingRequest.cs file in the AsyncLib project, and a Flickr app-id to the file FlickrRequest. You can also request just one of these keys, and just enable the corresponding functionality in the application.
-
-To build and run the .NET Core samples, please install
-* Visual Studio 2017 with the .NET Core workload
-
-Please download and install the tools from [.NET Core downloads](https://www.microsoft.com/net/core).
- 
-For code comments and issues please check [Professional C#'s GitHub Repository](https://github.com/ProfessionalCSharp/ProfessionalCSharp6)
-
-Please check my blog [csharp.christiannagel.com](https://csharp.christiannagel.com "csharp.christiannagel.com") for additional information for topics covered in the book.
-
-Thank you!
+# 异步
+如何理解异步呢？首先强调一点，**异步和线程关系不大**，不要看到异步就想起多线程的问题，他们中间是有点差别的。  
+## MSDOCS里面的刷盘子
+[点这里](https://docs.microsoft.com/zh-cn/dotnet/csharp/programming-guide/concepts/async/)  
+这个教程中，很好地说明了什么是异步，什么是多线程。  
+&emsp;&emsp;在做早餐的时候，烧水的时候去烤面包就是异步。这是一个真异步，因为烧水不是我（这里我可以理解为一个线程，而因为早餐是我一个人做的，所以是单线程）用用爱烧水的，而是用茶壶烧水的。这里的茶壶可以认为是一个应用程序，如OS的IO或者对数据库的查询。在这些事情做的时候，可以使用异步。就好比烧水的时候我不需要时刻盯着，我可以去做别的事情。查询数据库也可以使用异步进行，在这个过程中可以进行一些其他的操作。
