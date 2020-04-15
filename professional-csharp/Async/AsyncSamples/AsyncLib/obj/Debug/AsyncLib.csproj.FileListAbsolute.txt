@@ -1,0 +1,5 @@
+E:\Code\Csharp-Pratice\csharp高级编程练习\Async\AsyncSamples\AsyncLib\bin\Debug\AsyncLib.dll
+E:\Code\Csharp-Pratice\csharp高级编程练习\Async\AsyncSamples\AsyncLib\bin\Debug\AsyncLib.pdb
+E:\Code\Csharp-Pratice\csharp高级编程练习\Async\AsyncSamples\AsyncLib\obj\Debug\AsyncLib.csprojAssemblyReference.cache
+E:\Code\Csharp-Pratice\csharp高级编程练习\Async\AsyncSamples\AsyncLib\obj\Debug\AsyncLib.dll
+E:\Code\Csharp-Pratice\csharp高级编程练习\Async\AsyncSamples\AsyncLib\obj\Debug\AsyncLib.pdb
