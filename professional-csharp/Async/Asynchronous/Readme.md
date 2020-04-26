@@ -1,6 +1,6 @@
 # 12.6 异步操作的学习
 ## 隐式创建和运行任务
-`Parallel.Invoke`提供了可同时使用任意数量语句的方式。
+`Parallel.Invoke`提供了可同时使用任意数量语句的方式。  
 ——给每个工作项传入Action委托，可以使用lambda表达式来完成（嗯但是我不清楚这里是如何的把lambda表达式隐式的指示为Action委托的）。Microsoft Docs给出的代码如下：
 ```C# 
 Parallel.Invoke(() => DoSomeWork(), () => DoSomeOtherWork());
@@ -94,30 +94,33 @@ var getData = Task.Factory.StartNew(() => {
 - `ContinueWith`的额外用法:  
 因为 Task.ContinueWith 是实例方法，所以我可以将方法调用链接在一起，而不是为每个先行任务去实例化 `Task<TResult>` 对象。 以下示例与上一示例在功能上等同，唯一的不同在于它将对 Task.ContinueWith 方法的调用链接在一起。 请注意，通过方法调用链返回的 Task<TResult> 对象是最终延续任务。
 ```C#
- var displayData = Task.Factory.StartNew(() => { 
-                                                 Random rnd = new Random(); 
-                                                 int[] values = new int[100];
-                                                 for (int ctr = 0; ctr <= values.GetUpperBound(0); ctr++)
-                                                    values[ctr] = rnd.Next();
+ var displayData = Task.Factory.StartNew(() => 
+ { 
+Random rnd = new Random(); 
+int[] values = new int[100];
+for (int ctr = 0; ctr <= values.GetUpperBound(0); ctr++)
+values[ctr] = rnd.Next();
 
-                                                 return values;
-                                              } ).  
-                        ContinueWith((x) => {
-                                        int n = x.Result.Length;
-                                        long sum = 0;
-                                        double mean;
-                                  
-                                        for (int ctr = 0; ctr <= x.Result.GetUpperBound(0); ctr++)
-                                           sum += x.Result[ctr];
+return values;
+} );
+ContinueWith((x) => 
+{
+    int n = x.Result.Length;
+    long sum = 0;
+    double mean;
 
-                                        mean = sum / (double) n;
-                                        return Tuple.Create(n, sum, mean);
-                                     } ). 
-                        ContinueWith((x) => {
-                                        return String.Format("N={0:N0}, Total = {1:N0}, Mean = {2:N2}",
-                                                             x.Result.Item1, x.Result.Item2, 
-                                                             x.Result.Item3);
-                                     } );                         
+    for (int ctr = 0; ctr <= x.Result.GetUpperBound(0); ctr++)
+        sum += x.Result[ctr];
+
+    mean = sum / (double) n;
+    return Tuple.Create(n, sum, mean);
+} ). 
+ContinueWith((x) => 
+{
+return String.Format("N={0:N0}, Total = {1:N0}, Mean = {2:N2}",
+                        x.Result.Item1, x.Result.Item2, 
+                        x.Result.Item3);
+} );                         
       Console.WriteLine(displayData.Result);
 ```
 
