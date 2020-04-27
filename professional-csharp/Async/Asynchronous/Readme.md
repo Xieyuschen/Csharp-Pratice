@@ -2,7 +2,7 @@
 ## 隐式创建和运行任务
 `Parallel.Invoke`提供了可同时使用任意数量语句的方式。  
 ——给每个工作项传入Action委托，可以使用lambda表达式来完成（嗯但是我不清楚这里是如何的把lambda表达式隐式的指示为Action委托的）。Microsoft Docs给出的代码如下：
-```C# 
+```csharp
 Parallel.Invoke(() => DoSomeWork(), () => DoSomeOtherWork());
 ```
 嗯大概可能是在Invoke这个函数里面的表达式就会自动的成为委托嘛？嗯这个问题好像比较复杂，但不是当前学习的主要操作所以就先把问题留在这里。（逃了逃了
@@ -20,7 +20,7 @@ Parallel.Invoke(() => DoSomeWork(), () => DoSomeOtherWork());
 
 **所以一个任务是如何接受一个委托的？**
 嗯让我来试一试。那么很简单就是这么实现的：
-```C#
+```csharp
     Action action = new Action(myFavour.SayHello);
     action += myFavour.SayGoodbye;
     Task TaskDelegate = new Task(action);
@@ -31,7 +31,7 @@ Task接受一个Action类型的委托可以这么写。
 lambda表达式在这一块是相当重要的，之后学了再说吧。
 
 异步最大的特点我觉得是我只保证在这一段时间内任务都会被执行，但是不确定谁先谁后。例如
-```C#
+```csharp
    Learn learn = new Learn();
    Action action = new Action(learn.Show);
    Task task = new Task(action);
@@ -49,7 +49,7 @@ lambda表达式在这一块是相当重要的，之后学了再说吧。
 ## 创建任务延续  
 使用`Task.ContinueWith` 和 `Task<TResult>.ContinueWith` 方法,可以指定**要在先行任务完成时启动**的任务.延续任务的委托已经传递了对先行任务的引用,因此可以检查先行任务的状态.并可以通过检索 `Task<TResult>.Result`属性的值将先行任务的输出用作延续任务的输入.  
 简单而言,就是可以使用一个方法将任务A绑定到任务B上面去,任务A只有在B执行完之后才会被执行,这个步骤的完成就靠上面说的那几个方法和属性.
-```C#
+```csharp
 var getData = Task.Factory.StartNew(() => {
             Random rnd = new Random();
             //give array the random value
@@ -93,7 +93,7 @@ var getData = Task.Factory.StartNew(() => {
   
 - `ContinueWith`的额外用法:  
 因为 Task.ContinueWith 是实例方法，所以我可以将方法调用链接在一起，而不是为每个先行任务去实例化 `Task<TResult>` 对象。 以下示例与上一示例在功能上等同，唯一的不同在于它将对 Task.ContinueWith 方法的调用链接在一起。 请注意，通过方法调用链返回的 Task<TResult> 对象是最终延续任务。
-```C#
+```csharp
  var displayData = Task.Factory.StartNew(() => 
  { 
 Random rnd = new Random(); 
