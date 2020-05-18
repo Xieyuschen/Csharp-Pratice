@@ -188,3 +188,53 @@ Finished 1000001 loop iterations,threadid 7
 
 # 如何理解Task？
 Task表示一个异步操作。也就是说进行异步操作可以使用Task类。一个方法在使用`async`关键字时可以返回一个`Task`对象，这个Task对象说明了要进行什么事情。但是在执行时，就按照异步操作施行，究竟是哪一个线程执行都已经被封装，不属于考虑的范围了。
+
+# Task的执行
+如果一个函数返回一个task，那么调用它的时候这个task已经自动启动，不需要再调用`start(),Wait() or RunAsyncinously()`的方法了。
+```cs
+public class Example
+{
+    public static async Task func()
+    {
+        int ctr = 0;
+        for (ctr = 0; ctr <= 1000000; ctr++)
+        { }
+        Console.WriteLine("Finished {0} loop iterations,threadid {1}",
+                          ctr, Thread.CurrentThread.ManagedThreadId);
+    }
+    public static async Task Main()
+    {
+        int i = 0;
+        while (i++<5)
+        {
+            Task t = func();
+            Task t2 = Task.Factory.StartNew(() => {
+                // Just loop.
+                int ctr = 0;
+                for (ctr = 0; ctr <= 100000; ctr++)
+                { }
+                Console.WriteLine("This is Task222222222222!");
+            });
+            await t.ContinueWith(r =>
+            {
+                Console.WriteLine("ContinueWith Scope11111111111!");
+            });
+            await t.ContinueWith(r =>
+            {
+                Console.WriteLine("ContinueWith Scope2222222222222!");
+            });
+        }
+    }
+}
+//a part of whole output: 
+/*
+Finished 1000001 loop iterations,threadid 1
+ContinueWith Scope11111111111!
+This is Task222222222222!
+ContinueWith Scope2222222222222!
+Finished 1000001 loop iterations,threadid 4
+ContinueWith Scope11111111111!
+ContinueWith Scope2222222222222!
+This is Task222222222222!
+*/
+```
