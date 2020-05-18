@@ -131,3 +131,60 @@ hello
 2994 2995 2996 2997 2998 2999
 Line33: 1
 ```
+
+# Task的使用
+- StartNew在执行的时候已经开始执行，此处**不会阻塞线程**，在执行时候使用不同的线程完成所给任务。  
+- `Task.WhenAll()`要求必须完成任务之后才进行.  
+```cs
+public class Example
+{
+    public static async Task Main()
+    {
+        int i = 0;
+        while (i<5)
+        {
+            Task t = Task.Factory.StartNew(() => {
+                // Just loop.
+                int ctr = 0;
+                for (ctr = 0; ctr <= 1000000; ctr++)
+                { }
+                Console.WriteLine("Finished {0} loop iterations,threadid {1}",
+                                  ctr,Thread.CurrentThread.ManagedThreadId);
+            });
+            Console.WriteLine($"{ i++}");
+            await Task.WhenAll(t);
+        }
+    }
+}
+//该程序的输出：
+/*
+0
+Finished 1000001 loop iterations,threadid 4
+1
+Finished 1000001 loop iterations,threadid 5
+2
+Finished 1000001 loop iterations,threadid 5
+3
+Finished 1000001 loop iterations,threadid 7
+4
+*/
+```
+
+## 不使用`WhenAll`的输出：
+```cs
+/*
+0
+Finished 1000001 loop iterations,threadid 4
+1
+2
+3
+4
+Finished 1000001 loop iterations,threadid 5
+Finished 1000001 loop iterations,threadid 9
+Finished 1000001 loop iterations,threadid 8
+Finished 1000001 loop iterations,threadid 7
+*/
+```
+
+# 如何理解Task？
+Task表示一个异步操作。也就是说进行异步操作可以使用Task类。一个方法在使用`async`关键字时可以返回一个`Task`对象，这个Task对象说明了要进行什么事情。但是在执行时，就按照异步操作施行，究竟是哪一个线程执行都已经被封装，不属于考虑的范围了。
